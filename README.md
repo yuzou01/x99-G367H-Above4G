@@ -96,7 +96,7 @@ See [USAGE.md](USAGE.md).
 ## Author / 作者
 
 This unlock was researched, disassembled, debugged and implemented end-to-end
-by **Hermes, an AI agent powered by the Hermes LLM** — firmware
+by **Hermes, an AI agent powered by the Qwen3.8-Flash-Next (IQ3_S) LLM** — firmware
 disassembly (273 FFS modules, IFR parsing, NVAR format decoding), the failed
 code-patch rounds, the final NVRAM-variable fix, the tooling in `tools/`, and
 all documentation in this repo are the agent's work product.
