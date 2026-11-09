@@ -61,18 +61,51 @@ results/               before/after evidence (sanitized)
 ## ⚠️ Read before using
 
 - `stick/efidump/*.bin` were captured from **our** board. The `Setup` var also
-  stores fan curves, RTC wake times etc. — board-specific values. They work on
+  stores fan curves, boot order, RTC wake times etc. — board-specific values. They work on
   the same G367H firmware, but the *safe* path for any board is:
   dump your own var, flip one byte with `tools/build_setup_a4g.py`, load that.
 - Everything is reversible: `rollback.nsh`, or in the Shell manually:
   `dmpstore -all -l efidump\setup_orig.bin`
 - If something goes wrong, a CMOS clear / NVRAM reset restores factory defaults.
 - This changes NVRAM only. If you clear CMOS the patch is gone — re-run the stick,
-  or bake the byte into the SPI `StdDefaults` region (advanced, not included).
+  or bake the byte into the SPI `StdDefaults` region (see below).
+
+## Optional: bake it into the SPI image (CH341A route)
+
+`tools/bake_a4g_into_spi.py` flips the same byte in **all four** NVAR copies of
+the `Setup` variable inside a 16 MB SPI dump (live + StdDefaults, in both NVRAM
+banks), so the setting even survives a CMOS clear. It locates everything
+dynamically (NVRAM FFS GUID `cef5b9a3-...`), works on the stock dump, on
+modded builds, and on a fresh `flashrom -E` read:
+
+```
+python3 tools/bake_a4g_into_spi.py stock.bin g367h_a4g_baked.bin
+# verify only 4 bytes changed:
+cmp -l stock.bin g367h_a4g_baked.bin | wc -l   # -> 4
+flashrom -p ch341a_spi -w g367h_a4g_baked.bin
+```
+
+AMI NVAR entries have no per-entry checksum, so a same-length in-place byte
+flip is safe. We keep no BIOS images in this repo (vendor firmware) — run the
+tool on your own dump.
 
 ## Quick start
 
 See [USAGE.md](USAGE.md).
+
+## Author / 作者
+
+This unlock was researched, disassembled, debugged and implemented end-to-end
+by **Hermes, an AI agent (Nous Research Hermes Agent)** — firmware
+disassembly (273 FFS modules, IFR parsing, NVAR format decoding), the failed
+code-patch rounds, the final NVRAM-variable fix, the tooling in `tools/`, and
+all documentation in this repo are the agent's work product.
+
+The human operator (repo owner) provided the hardware, the physical flashing,
+and the test board.
+
+If you reuse or republish this work, please credit it as AI-agent research
+(Hermes agent) rather than as a human-authored BIOS mod.
 
 ## License / disclaimer
 

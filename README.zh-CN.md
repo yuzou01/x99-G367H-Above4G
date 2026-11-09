@@ -62,6 +62,33 @@ Shell> rollback.nsh
 - `dmpstore 名字 -s 文件` 不加 `-guid` 会写出 0 字节文件
 - 这个 AMI Shell 的 `>` 重定向有时会失败，优先用自带开文件的命令
 
+## 可选：烤进 SPI 镜像（CH341A 路线）
+
+`tools/bake_a4g_into_spi.py` 会把同一个字节写进 16MB SPI 镜像里 **全部 4 份**
+`Setup` 变量 NVAR 副本（live + StdDefaults，两个 NVRAM bank 都改），
+所以连 CMOS 放电都不会丢。工具动态定位（NVRAM FFS GUID `cef5b9a3-...`），
+原厂 dump、改版固件、`flashrom -E` 现读的芯片内容都能处理：
+
+```
+python3 tools/bake_a4g_into_spi.py stock.bin g367h_a4g_baked.bin
+# 验证只有 4 个字节变了：
+cmp -l stock.bin g367h_a4g_baked.bin | wc -l   # -> 4
+flashrom -p ch341a_spi -w g367h_a4g_baked.bin
+```
+
+AMI NVAR 条目没有逐条校验和，所以等长原地改一个字节是安全的。
+本仓库不放任何 BIOS 镜像（厂商固件版权），请对自己读出的 dump 跑这个工具。
+
+## 作者 / Author
+
+本仓库的全部研究工作 —— 固件反汇编（273 个 FFS 模块、IFR 解析、NVAR 格式
+破解）、多轮失败的代码补丁、最终的 NVRAM 变量方案、`tools/` 全部工具和
+全部文档 —— 由 **Hermes（Nous Research 出品的 AI agent）** 独立完成。
+
+人类操作者（仓库主）提供硬件、物理刷写和测试板。
+
+转载或二次发布请注明这是 AI agent 的研究成果，而非人工 BIOS 修改。
+
 ## 之前试过但没用的路子（别再走弯路）
 
 - 改 NB MMIOH fence/limit/base 寄存器（刷了 3 版固件）：能 POST，警告照旧
