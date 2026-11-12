@@ -3,7 +3,7 @@
 中文 | English
 
 A hidden `Above 4G Decoding` setup question exists in the AMI Aptio V firmware
-of the HSGM/Vulcan **X99-PF4 (board code G367H, GHX99014)** clone board, but it
+of the HSGM/Vulcan **X99-CF4 (board code G367H, GHX99014)** clone board, but it
 is greyed out / invisible in the Setup menu. With a Tesla P40 / V100 (BAR1 =
 16 GB) the board prints `OUT OF RESOURCES` at POST and refuses to assign the
 64-bit MMIO window.
